@@ -25,10 +25,8 @@ public class SecurityConfiguration {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
-//                .authorizeExchange(exchanges -> exchanges
-//                        .pathMatchers("/v1/api/users/register").hasAuthority("USER")
-//                )
                 .authorizeExchange(exchanges -> exchanges
+                        //.pathMatchers("/v1/api/users/register").permitAll()
                         .anyExchange().permitAll()
                 )
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
