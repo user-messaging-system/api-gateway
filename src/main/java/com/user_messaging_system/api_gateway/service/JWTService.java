@@ -1,68 +1,81 @@
 package com.user_messaging_system.api_gateway.service;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 
 @Service
 public class JWTService {
-    private final Key SECRET_KEY = Keys.hmacShaKeyFor("929dfc305899415c31f576fc46d8bd8b81b7e1fb6c256bbacfe0656c1da7bf11".getBytes());
+    public static final String SECRET_KEY = "05548d6d1cbd0d0f1c43332823ed32943dac7db78257fd7529c627e7e1e6e807";
 
-    public void validateHeader(ServerHttpRequest request) {
-        String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (Objects.isNull(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
-            throw new JWTVerificationException("Invalid token");
-        }
+    public String generateJwtToken(String email, List<String> roles) {
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 5 * 24 * 60 * 60 * 1000))
+                .signWith(getSignInKey())
+                .compact();
     }
 
     public void validateToken(ServerHttpRequest request) {
         try {
-            String token = extractToken(request);
+            String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (Objects.isNull(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
+                throw new JWTVerificationException("Invalid token");
+            }
+
+            String token = authorizationHeader.substring(7);
             validateTokenExpired(token);
-            Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
+            Jwts.parser()
+                    .verifyWith(getSignInKey())
                     .build()
-                    .parseClaimsJws(token);
-        } catch (JWTVerificationException | IllegalArgumentException e) {
-            throw new JWTVerificationException("Geçersiz token");
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (JwtException e) {
+            throw new JWTVerificationException("Geçersiz token: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new JWTVerificationException("Token geçersiz veya bozuk: " + e.getMessage());
         }
     }
 
     public String extractEmail(String token) {
-        JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(SECRET_KEY)
-                .build();
-        Claims claims = jwtParser.parseClaimsJws(token).getBody();
+        Claims claims = extractAllClaims(token);
         return claims.getSubject();
     }
 
     public Collection<GrantedAuthority> extractRoles(String token) {
-        return extractClaim(token, claims -> {
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            Object rolesObject = claims.get("roles");
-            if (rolesObject instanceof List<?>) {
-                for (Object item : (List<?>) rolesObject) {
-                    if (item instanceof String) {
-                        authorities.add(new SimpleGrantedAuthority((String) item));
-                    }
+        return extractClaim(token, this::extractRolesFromClaims);
+    }
+
+    private List<GrantedAuthority> extractRolesFromClaims(Claims claims) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        Object rolesObject = claims.get("roles");
+        if (rolesObject instanceof List<?>) {
+            for (Object item : (List<?>) rolesObject) {
+                if (item instanceof String) {
+                    authorities.add(new SimpleGrantedAuthority((String) item));
                 }
             }
-            return authorities;
-        });
+        }
+        return authorities;
     }
 
     public String extractToken(ServerHttpRequest request) {
-        return Objects.requireNonNull(request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION)).substring(7);
+        String authorizationHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        throw new JWTVerificationException("Authorization header is missing or invalid");
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -71,11 +84,11 @@ public class JWTService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private Date extractExpiration(String token) {
@@ -83,12 +96,13 @@ public class JWTService {
     }
 
     private void validateTokenExpired(String token) {
-        try {
-            if (extractExpiration(token).before(new Date())) {
-                throw new JWTVerificationException("Token süresi doldu");
-            }
-        } catch (JWTVerificationException e) {
-            throw new JWTVerificationException("Geçersiz token");
+        if (extractExpiration(token).before(new Date())) {
+            throw new JWTVerificationException("Token süresi doldu");
         }
     }
+
+    private SecretKey getSignInKey() {
+        byte[] bytes = Base64.getDecoder()
+                .decode(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        return new SecretKeySpec(bytes, "HmacSHA256"); }
 }
