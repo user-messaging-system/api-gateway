@@ -1,8 +1,10 @@
 package com.user_messaging_system.api_gateway.dto;
 
+import java.util.List;
+
 public record UserDTO(
-        String id,
+        String email,
         String name,
         String lastName,
-        String email
+        List<String> roles
 ) { }
