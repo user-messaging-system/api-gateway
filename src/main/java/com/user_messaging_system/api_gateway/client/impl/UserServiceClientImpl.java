@@ -1,11 +1,15 @@
 package com.user_messaging_system.api_gateway.client.impl;
 
+import com.user_messaging_system.api_gateway.api.response.ServiceResponse;
 import com.user_messaging_system.api_gateway.client.UserServiceClient;
 import com.user_messaging_system.api_gateway.dto.UserDTO;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Component
 public class UserServiceClientImpl implements UserServiceClient {
@@ -16,14 +20,14 @@ public class UserServiceClientImpl implements UserServiceClient {
     }
 
     @Override
-    public Mono<UserDTO> getUserById(String userId) {
+    public Mono<List<UserDTO>> getSenderAndReceiverByIds(String senderId, String receiverId) {
         return webClient.get()
-                .uri("http://user-service/v1/api/users/{userId}", userId)
+                .uri("http://user-service/v1/api/users/{senderId}/{receiverId}", senderId, receiverId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, clientResponse ->
-                        clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new Exception("Error: " + errorBody)))
-                )
-                .bodyToMono(UserDTO.class);
+                .bodyToMono(new ParameterizedTypeReference<ServiceResponse<UserDTO>>() {})
+                .map(ServiceResponse::data)
+                .onErrorResume(WebClientResponseException.class, ex -> {
+                    return Mono.error(ex);
+                });
     }
 }
