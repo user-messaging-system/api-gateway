@@ -8,5 +8,5 @@ import java.util.List;
 public record UserMessageGetOutput(
         UserDTO senderUser,
         UserDTO receiverUser,
-        List<MessageDTO> messageDTOList
+        List<MessageDTO> messages
 ) { }
