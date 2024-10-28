@@ -1,9 +1,7 @@
 package com.user_messaging_system.api_gateway.client.impl;
 
-import com.user_messaging_system.api_gateway.api.response.ServiceResponse;
 import com.user_messaging_system.api_gateway.client.MessageServiceClient;
 import com.user_messaging_system.api_gateway.dto.MessageDTO;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,5 +26,10 @@ public class MessageServiceClientImpl implements MessageServiceClient {
                                 .flatMap(errorBody -> Mono.error(new Exception("Error: " + errorBody)))
                 )
                 .bodyToFlux(MessageDTO.class);
+    }
+
+    @Override
+    public Mono<Void> deleteMessageById(String id){
+        return null;
     }
 }
