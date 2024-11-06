@@ -2,7 +2,8 @@ package com.user_messaging_system.api_gateway.filter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.user_messaging_system.api_gateway.service.JWTService;
+import com.user_messaging_system.core_library.exception.UnauthorizedException;
+import com.user_messaging_system.core_library.service.JWTService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,13 +16,13 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class CustomAuthorizationFilter implements WebFilter {
     private final JWTService jwtService;
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/v1/api/auth/login",
             "/v1/api/users/register"
-            // Add more paths here as needed
     );
 
     public CustomAuthorizationFilter(JWTService jwtService) {
@@ -35,7 +36,7 @@ public class CustomAuthorizationFilter implements WebFilter {
                 return chain.filter(exchange);
             }
 
-            jwtService.validateToken(exchange.getRequest());
+            jwtService.validateToken(getAuthorizationToken(exchange));
             String token = jwtService.extractToken(exchange.getRequest());
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(
@@ -67,5 +68,15 @@ public class CustomAuthorizationFilter implements WebFilter {
 
     private boolean isExcludedPath(String path) {
         return EXCLUDED_PATHS.contains(path);
+    }
+
+    private String getAuthorizationToken(ServerWebExchange exchange){
+        String authorizationHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+
+        if(Objects.nonNull(authorizationHeader) && authorizationHeader.startsWith("Bearer ")){
+            return authorizationHeader.substring(7);
+        }
+
+        throw new UnauthorizedException("Authorization header is missing or invalid");
     }
 }
