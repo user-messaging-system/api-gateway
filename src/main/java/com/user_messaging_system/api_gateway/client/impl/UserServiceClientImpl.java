@@ -20,9 +20,10 @@ public class UserServiceClientImpl implements UserServiceClient {
     }
 
     @Override
-    public Mono<List<UserDTO>> getSenderAndReceiverByIds(String senderId, String receiverId) {
+    public Mono<List<UserDTO>> getSenderAndReceiverByIds(String jwtToken, String senderId, String receiverId) {
         return webClient.get()
                 .uri("http://user-service/v1/api/users/{senderId}/{receiverId}", senderId, receiverId)
+                .header("Authorization", jwtToken)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ServiceResponse<UserDTO>>() {})
                 .map(ServiceResponse::data)

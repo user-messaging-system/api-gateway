@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface UserServiceClient {
-    Mono<List<UserDTO>> getSenderAndReceiverByIds(String senderId, String receiverId);
+    Mono<List<UserDTO>> getSenderAndReceiverByIds(String jwtToken, String senderId, String receiverId);
 }
