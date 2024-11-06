@@ -6,6 +6,6 @@ import reactor.core.publisher.Mono;
 
 
 public interface MessageServiceClient {
-     Flux<MessageDTO> getMessagesBetweenUsers(String senderId, String receiverId);
+     Flux<MessageDTO> getMessagesBetweenUsers(String jwtToken, String senderId, String receiverId);
      Mono<Void> deleteMessageById(String id);
 }
