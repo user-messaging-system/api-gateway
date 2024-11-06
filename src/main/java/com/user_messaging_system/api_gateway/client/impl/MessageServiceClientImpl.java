@@ -17,9 +17,10 @@ public class MessageServiceClientImpl implements MessageServiceClient {
     }
 
     @Override
-    public Flux<MessageDTO> getMessagesBetweenUsers(String senderId, String receiverId) {
+    public Flux<MessageDTO> getMessagesBetweenUsers(String jwtToken, String senderId, String receiverId) {
         return webClient.get()
                 .uri("http://message-service/v1/api/messages/conversations/{senderId}/{receiverId}", senderId, receiverId)
+                .header("Authorization", jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, clientResponse ->
                         clientResponse.bodyToMono(String.class)
