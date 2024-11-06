@@ -1,7 +1,7 @@
 package com.user_messaging_system.api_gateway.security;
 
 import com.user_messaging_system.api_gateway.filter.CustomAuthorizationFilter;
-import com.user_messaging_system.api_gateway.service.JWTService;
+import com.user_messaging_system.core_library.service.JWTService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
@@ -14,14 +14,8 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
-    private final JWTService jwtService;
-
-    public SecurityConfiguration(JWTService jwtService) {
-        this.jwtService = jwtService;
-    }
-
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, JWTService jwtService) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
@@ -34,5 +28,10 @@ public class SecurityConfiguration {
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .addFilterBefore(new CustomAuthorizationFilter(jwtService), SecurityWebFiltersOrder.AUTHORIZATION)
                 .build();
+    }
+
+    @Bean
+    public JWTService getJWTService(){
+        return new JWTService();
     }
 }
