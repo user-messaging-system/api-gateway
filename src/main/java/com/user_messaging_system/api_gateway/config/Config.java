@@ -12,7 +12,6 @@ public class Config {
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder()
                 .defaultHeader("Content-Type", "application/json")
-                .defaultHeader("Authorization", "Bearer default-token")
                 .filter((request, next) -> {
                     System.out.println("Request URI: " + request.url());
                     return next.exchange(request);
