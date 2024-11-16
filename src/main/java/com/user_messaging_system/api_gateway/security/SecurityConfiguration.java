@@ -14,8 +14,14 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
+    private final JWTService jwtService;
+
+    public SecurityConfiguration(JWTService jwtService) {
+        this.jwtService = jwtService;
+    }
+
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, JWTService jwtService) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
@@ -28,10 +34,5 @@ public class SecurityConfiguration {
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .addFilterBefore(new CustomAuthorizationFilter(jwtService), SecurityWebFiltersOrder.AUTHORIZATION)
                 .build();
-    }
-
-    @Bean
-    public JWTService getJWTService(){
-        return new JWTService();
     }
 }

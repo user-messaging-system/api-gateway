@@ -1,7 +1,6 @@
 package com.user_messaging_system.api_gateway.api;
 
 import com.user_messaging_system.api_gateway.api.output.UserMessageGetOutput;
-import com.user_messaging_system.api_gateway.client.AuthenticationServiceClient;
 import com.user_messaging_system.api_gateway.client.MessageServiceClient;
 import com.user_messaging_system.api_gateway.client.UserServiceClient;
 import com.user_messaging_system.api_gateway.dto.MessageDTO;
@@ -17,16 +16,13 @@ import java.util.List;
 public class UserController {
     private final UserServiceClient userServiceClient;
     private final MessageServiceClient messageServiceClient;
-    private final AuthenticationServiceClient authenticationServiceClient;
 
     public UserController(
             UserServiceClient userServiceClient,
-            MessageServiceClient messageServiceClient,
-            AuthenticationServiceClient authenticationServiceClient
+            MessageServiceClient messageServiceClient
     ) {
         this.userServiceClient = userServiceClient;
         this.messageServiceClient = messageServiceClient;
-        this.authenticationServiceClient = authenticationServiceClient;
     }
 
     @GetMapping("/users/{senderId}/messages/{receiverId}")
