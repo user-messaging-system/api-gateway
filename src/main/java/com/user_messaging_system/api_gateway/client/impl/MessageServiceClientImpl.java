@@ -2,6 +2,7 @@ package com.user_messaging_system.api_gateway.client.impl;
 
 import com.user_messaging_system.api_gateway.client.MessageServiceClient;
 import com.user_messaging_system.api_gateway.dto.MessageDTO;
+import com.user_messaging_system.core_library.service.JWTService;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,10 +11,12 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class MessageServiceClientImpl implements MessageServiceClient {
+    private final JWTService jwtService;
     private final WebClient webClient;
 
-    public MessageServiceClientImpl(WebClient.Builder webClienBuilder){
+    public MessageServiceClientImpl(WebClient.Builder webClienBuilder, JWTService jwtService){
         this.webClient = webClienBuilder.build();
+        this.jwtService = jwtService;
     }
 
     @Override
