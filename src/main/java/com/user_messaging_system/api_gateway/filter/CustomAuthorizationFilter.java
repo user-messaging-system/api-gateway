@@ -5,6 +5,7 @@ import com.user_messaging_system.core_library.response.ErrorResponse;
 import com.user_messaging_system.core_library.service.JWTService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -21,7 +22,7 @@ public class CustomAuthorizationFilter implements WebFilter {
     private final JWTService jwtService;
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/v1/api/auth/login",
-            "/v1/api/users/register"
+            "/v1/api/users"
     );
 
     public CustomAuthorizationFilter(JWTService jwtService) {
@@ -31,7 +32,7 @@ public class CustomAuthorizationFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         try{
-            if(isExcludedPath(exchange.getRequest().getPath().value())){
+            if(isExcludedPath(exchange.getRequest().getPath().value()) && exchange.getRequest().getMethod().equals(HttpMethod.POST)){
                 return chain.filter(exchange);
             }
 
