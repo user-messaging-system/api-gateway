@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.server.ServerWebExchange;
@@ -22,7 +21,7 @@ public class CustomAuthorizationFilter implements WebFilter {
     private final JWTService jwtService;
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/v1/api/auth/login",
-            "/v1/api/users"
+            "/user-service/v1/api/users"
     );
 
     public CustomAuthorizationFilter(JWTService jwtService) {

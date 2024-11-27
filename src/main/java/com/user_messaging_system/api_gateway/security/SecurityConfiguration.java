@@ -9,6 +9,9 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -24,7 +27,7 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
+                .cors(corsSpec -> corsSpec.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()))
                 .authorizeExchange(exchanges -> exchanges
                         //.pathMatchers("/v1/api/users/register").permitAll()
                         .anyExchange().permitAll()
@@ -34,5 +37,20 @@ public class SecurityConfiguration {
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .addFilterBefore(new CustomAuthorizationFilter(jwtService), SecurityWebFiltersOrder.AUTHORIZATION)
                 .build();
+    }
+
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+
+        corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+
+        return new CorsWebFilter(source);
     }
 }
