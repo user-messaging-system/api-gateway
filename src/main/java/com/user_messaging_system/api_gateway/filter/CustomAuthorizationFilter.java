@@ -21,7 +21,7 @@ public class CustomAuthorizationFilter implements WebFilter {
     private final JWTService jwtService;
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/v1/api/auth/login",
-            "/user-service/v1/api/users"
+            "/v1/api/users"
     );
 
     public CustomAuthorizationFilter(JWTService jwtService) {
