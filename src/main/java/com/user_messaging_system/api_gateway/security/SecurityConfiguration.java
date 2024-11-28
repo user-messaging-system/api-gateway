@@ -27,7 +27,8 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(corsSpec -> corsSpec.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()))
+                .cors(ServerHttpSecurity.CorsSpec::disable)
+                //.cors(corsSpec -> corsSpec.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()))
                 .authorizeExchange(exchanges -> exchanges
                         //.pathMatchers("/v1/api/users/register").permitAll()
                         .anyExchange().permitAll()
