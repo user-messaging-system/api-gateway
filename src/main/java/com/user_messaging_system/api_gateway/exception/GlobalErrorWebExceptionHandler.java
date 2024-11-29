@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import static com.user_messaging_system.core_library.common.constant.ErrorConstant.NO_ROOT_CAUSE_AVAILABLE;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Component
 @Order(-2)
@@ -59,7 +61,7 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
     private ErrorResponse createErrorResponse(ServerWebExchange exchange, Throwable ex){
         return new ErrorResponse.Builder()
                 .message(ex.getMessage())
-                .error(ex.getCause() != null ? ex.getCause().getMessage() : "No root cause available")
+                .errors(List.of(ex.getCause() != null ? ex.getCause().getMessage() : NO_ROOT_CAUSE_AVAILABLE))
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(exchange.getRequest().getURI().getPath())
                 .build();

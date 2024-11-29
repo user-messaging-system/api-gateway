@@ -59,7 +59,7 @@ public class CustomAuthorizationFilter implements WebFilter {
 
         ErrorResponse errorResponse = new ErrorResponse.Builder()
                 .message("Invalid token")
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                .errors(List.of(HttpStatus.UNAUTHORIZED.getReasonPhrase()))
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .path(path)
                 .build();
