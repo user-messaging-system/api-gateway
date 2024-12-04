@@ -36,7 +36,7 @@ public class CustomAuthorizationFilter implements WebFilter {
             }
 
             HttpHeaders headers = exchange.getRequest().getHeaders();
-            String token = jwtService.extractToken(headers.getFirst(HttpHeaders.AUTHORIZATION));
+            String token = jwtService.extractCookieHeaderToken(headers.getFirst(HttpHeaders.COOKIE));
             jwtService.validateToken(token);
 
             UsernamePasswordAuthenticationToken authenticationToken =
